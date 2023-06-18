@@ -1,4 +1,4 @@
-name: Build and publish
+name: Budowanie i publikacja
 
 on:
   push:
@@ -13,38 +13,39 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Sprawdzenie repozytorium
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
+      - name: Konfiguracja Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 14
 
-      - name: Install dependencies
+      - name: Instalacja zależności
         run: npm install
 
-      - name: Build and tag Docker image
+      - name: Budowanie i tagowanie obrazu Docker
         run: |
           docker build -t ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }} -t ghcr.io/wfgen/zadanie2docker:latest .
           docker tag ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Push Docker image
+      - name: Wysyłanie obrazu Docker
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           docker push ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }}
           docker push ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Set image metadata
+      - name: Ustawianie metadanych obrazu
         uses: docker/metadata-action@v3
         with:
           images: ghcr.io/wfgen/zadanie2docker
 
-      - name: Read image version
+      - name: Odczyt wersji obrazu
         uses: docker/metadata-action@v3
         id: metadata
         with:
           images: ghcr.io/wfgen/zadanie2docker
 
-      - name: Display image version
-        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}"
+      - name: Wyświetlanie wersji obrazu
+        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}" >> $GITHUB_ENV
+
