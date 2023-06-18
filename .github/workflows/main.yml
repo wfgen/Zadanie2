@@ -47,5 +47,4 @@ jobs:
           images: ghcr.io/wfgen/zadanie2
 
       - name: Display image version
-        run: echo "Image version: ${{steps.metadata.outputs.tags }}"
-        
+        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}" >> $GITHUB_ENV
