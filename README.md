@@ -10,6 +10,11 @@ In the project directory, you can run:
 
 Runs the app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+![image](https://github.com/wfgen/Zadanie2Docker/assets/108794719/f36059e8-d8ee-4d44-ba2a-2dd06d8d19c8)
+
+push to git
+![image](https://github.com/wfgen/Zadanie2Docker/assets/108794719/998796be-4362-4fd8-b457-68865b1642f0)
+
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
