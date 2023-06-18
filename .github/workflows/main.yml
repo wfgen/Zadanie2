@@ -1,0 +1,50 @@
+name: Build and publish
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PACKAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }} .
+          docker tag ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2:latest
+
+      - name: Push Docker image
+        run: |
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker push ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }}
+          docker push ghcr.io/wfgen/zadanie2:latest
+
+      - name: Set image metadata
+        uses: docker/metadata-action@v3
+        with:
+          images: ghcr.io/wfgen/zadanie2
+
+      - name: Read image version
+        uses: docker/metadata-action@v3
+        id: metadata
+        with:
+          images: ghcr.io/wfgen/zadanie2
+
+      - name: Display image version
+        run: echo "Image version: ${{ steps.metadata.outputs.tags }}"
