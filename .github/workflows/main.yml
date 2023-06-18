@@ -47,4 +47,4 @@ jobs:
           images: ghcr.io/wfgen/zadanie2docker
 
       - name: Display image version
-        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}" >> $GITHUB_ENV
+        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}"
