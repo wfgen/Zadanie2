@@ -1,4 +1,4 @@
-name: Budowanie i publikacja
+name: Budowanie i publikacji
 
 on:
   push:
