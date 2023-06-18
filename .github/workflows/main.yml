@@ -26,25 +26,25 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }} .
-          docker tag ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2:latest
+          docker build -t ghcr.io/wfgen/Zadanie2:${{ env.PACKAGE_TAG }} .
+          docker tag ghcr.io/wfgen/Zadanie2:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2:latest
 
       - name: Push Docker image
         run: |
           echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }}
-          docker push ghcr.io/wfgen/zadanie2:latest
+          docker push ghcr.io/wfgen/Zadanie2:${{ env.PACKAGE_TAG }}
+          docker push ghcr.io/wfgen/Zadanie2:latest
 
       - name: Set image metadata
         uses: docker/metadata-action@v3
         with:
-          images: ghcr.io/wfgen/zadanie2
+          images: ghcr.io/wfgen/Zadanie2
 
       - name: Read image version
         uses: docker/metadata-action@v3
         id: metadata
         with:
-          images: ghcr.io/wfgen/zadanie2
+          images: ghcr.io/wfgen/Zadanie2
 
       - name: Display image version
         run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}" >> $GITHUB_ENV
