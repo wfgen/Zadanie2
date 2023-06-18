@@ -26,7 +26,7 @@ jobs:
 
       - name: Build and tag Docker image
         run: |
-          docker build -t ghcr.io/wfgen/Zadanie2:${{ env.PACKAGE_TAG }} .
+          docker build -t ghcr.io/wfgen/zadanie2:${{ env.PACKAGE_TAG }} -t ghcr.io/wfgen/zadanie2:latest .
           docker tag ghcr.io/wfgen/Zadanie2:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2:latest
 
       - name: Push Docker image
