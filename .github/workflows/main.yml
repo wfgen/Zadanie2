@@ -60,6 +60,8 @@ jobs:
         run: |
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
           docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
 
       - name: Show version
         run: echo "Generated version:${{ steps.generate-version.outputs.version }}"
