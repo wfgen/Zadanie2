@@ -26,28 +26,17 @@ jobs:
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Install Clair
+      - name: Install Trivy
         run: |
-          docker pull quay.io/coreos/clair:v4.1.1
-
-      - name: Start Clair
-        run: |
-          docker run -d --name clair --network host -p 6060:6060 quay.io/coreos/clair:v4.1.1
-
-      - name: Wait for Clair to start
-        run: |
-          sleep 10
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Scan Docker image for vulnerabilities
         run: |
-          docker exec clair clair-scanner --ip "$(hostname -I | awk '{print $1}')" -r report.json ghcr.io/wfgen/zadanie2docker:latest
-
-      - name: Stop Clair
-        run: |
-          docker stop clair
+          trivy image ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Display vulnerabilities report
         run: |
+          trivy image -f json ghcr.io/wfgen/zadanie2docker:latest > report.json
           cat report.json
 
       - name: Login to GitHub Container Registry
@@ -71,8 +60,4 @@ jobs:
       - name: Tag and push Docker image
         run: |
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
-          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
-
-      - name: Show version
-        run: |
-          echo "Image version: ${{ steps.generate-version.outputs.version }}"
+          docker push ghcr.io/wfgen/zadanie2
