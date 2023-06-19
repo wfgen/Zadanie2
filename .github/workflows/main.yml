@@ -55,7 +55,7 @@ jobs:
       - name: Generate new image version
         id: generate-version
         run: |
-          version=$(python ./Zadanie2Docker/generate_version.py "${{ steps.get-version.outputs.version }}")
+          version=$(python ./zadanie2docker/generate_version.py "${{ steps.get-version.outputs.version }}")
           echo "::set-output name=version::${version}"
 
       - name: Tag and push Docker image
