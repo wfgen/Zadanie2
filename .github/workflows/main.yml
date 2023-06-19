@@ -43,7 +43,7 @@ jobs:
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.GITHUB_AKTOR }}
-          password: ${{ secrets.REPO_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
 
       - name: Get latest image version
