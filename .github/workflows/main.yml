@@ -26,17 +26,29 @@ jobs:
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Authenticate with Snyk
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        run: npx snyk auth
+      - name: Install Clair
+        run: |
+          docker pull quay.io/coreos/clair:v4.1.1
+
+      - name: Start Clair
+        run: |
+          docker run -d --name clair --network host -p 6060:6060 quay.io/coreos/clair:v4.1.1
+
+      - name: Wait for Clair to start
+        run: |
+          sleep 10
 
       - name: Scan Docker image for vulnerabilities
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         run: |
-          export SNYK_TOKEN=${{ secrets.SNYK_TOKEN }}
-          snyk test ghcr.io/wfgen/zadanie2docker:latest
+          docker exec clair clair-scanner --ip "$(hostname -I | awk '{print $1}')" -r report.json ghcr.io/wfgen/zadanie2docker:latest
+
+      - name: Stop Clair
+        run: |
+          docker stop clair
+
+      - name: Display vulnerabilities report
+        run: |
+          cat report.json
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
