@@ -42,9 +42,10 @@ jobs:
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          registry: ghcr.io
           username: ${{ secrets.GITHUB_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ghcr.io
+          repo: ghcr.io/wfgen/zadanie2docker
 
       - name: Get latest image version
         id: get-version
@@ -60,4 +61,4 @@ jobs:
       - name: Tag and push Docker image
         run: |
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
-          docker push ghcr.io/wfgen/zadanie2
+          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
