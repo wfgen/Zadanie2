@@ -26,6 +26,10 @@ jobs:
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
+      - name: Install Trivy
+        run: |
+          apk add --no-cache trivy
+
       - name: Test Docker image for CVEs with Trivy
         run: trivy --severity HIGH,CRITICAL ghcr.io/wfgen/zadanie2docker:latest
 
