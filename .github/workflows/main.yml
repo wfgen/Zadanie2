@@ -1,51 +1,57 @@
-name: Budowanie i publikacji
+name: Build
 
 on:
   push:
     branches:
       - main
 
-env:
-  PACKAGE_TAG: ${{ github.sha }}
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sprawdzenie repozytorium
+      - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Konfiguracja Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: '14'
 
-      - name: Instalacja zależności
+      - name: Install dependencies
         run: npm install
 
-      - name: Budowanie i tagowanie obrazu Docker
+      - name: Build Docker image
         run: |
-          docker build -t ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }} -t ghcr.io/wfgen/zadanie2docker:latest .
-          docker tag ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }} ghcr.io/wfgen/zadanie2docker:latest
+          docker build -t my-docker-image .
+          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Wysyłanie obrazu Docker
+      - name: Test Docker image for CVEs with Trivy
+        run: trivy --severity HIGH,CRITICAL ghcr.io/wfgen/zadanie2docker:latest
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GITHUB_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get latest image version
+        id: get-version
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker push ghcr.io/wfgen/zadanie2docker:${{ env.PACKAGE_TAG }}
-          docker push ghcr.io/wfgen/zadanie2docker:latest
+          echo "::set-output name=version::$(docker images --format "{{.Tag}}" ghcr.io/wfgen/zadanie2docker | sort -V | tail -1)"
 
-      - name: Ustawianie metadanych obrazu
-        uses: docker/metadata-action@v3
-        with:
-          images: ghcr.io/wfgen/zadanie2docker
+      - name: Generate new image version
+        id: generate-version
+        run: |
+          version=$(python generate_version.py "${{ steps.get-version.outputs.version }}")
+          echo "::set-output name=version::${version}"
 
-      - name: Odczyt wersji obrazu
-        uses: docker/metadata-action@v3
-        id: metadata
-        with:
-          images: ghcr.io/wfgen/zadanie2docker
+      - name: Tag and push Docker image
+        run: |
+          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
 
-      - name: Wyświetlanie wersji obrazu
-        run: echo "IMAGE_VERSION=${{ steps.metadata.outputs.tags }}" >> $GITHUB_ENV
-
+      - name: Show version
+        run: |
+          echo "Image version: ${{ steps.generate-version.outputs.version }}"
