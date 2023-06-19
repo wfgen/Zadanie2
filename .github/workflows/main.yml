@@ -21,10 +21,24 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Restore Docker image cache
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+
       - name: Build Docker image
         run: |
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
+        env:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+
+      - name: Save Docker image cache
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker
+          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
 
       - name: Install Trivy
         run: |
@@ -60,8 +74,6 @@ jobs:
         run: |
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
           docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
 
       - name: Show version
         run: echo "Generated version:${{ steps.generate-version.outputs.version }}"
