@@ -26,16 +26,8 @@ jobs:
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Install Anchore CLI
-        run: |
-          curl -sSfL https://anchore.io/cli/anchore-cli/install.sh | sh -s -- -y
-          export PATH=$PATH:$HOME/.anchore-cli/bin
-
-      - name: Scan Docker image with Anchore
-        run: |
-          anchore-cli image add ghcr.io/wfgen/zadanie2docker:latest
-          anchore-cli image wait ghcr.io/wfgen/zadanie2docker:latest
-          anchore-cli image vuln ghcr.io/wfgen/zadanie2docker:latest all
+      - name: Scan Docker image for vulnerabilities
+        run: npx snyk container test ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
