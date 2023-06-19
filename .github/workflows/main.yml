@@ -26,6 +26,9 @@ jobs:
           docker build -t my-docker-image .
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
+      - name: Authenticate with Snyk
+        run: npx snyk auth
+
       - name: Scan Docker image for vulnerabilities
         run: npx snyk container test ghcr.io/wfgen/zadanie2docker:latest
 
