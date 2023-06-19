@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Trivy
         run: |
-          apk add --no-cache trivy
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Test Docker image for CVEs with Trivy
         run: trivy --severity HIGH,CRITICAL ghcr.io/wfgen/zadanie2docker:latest
