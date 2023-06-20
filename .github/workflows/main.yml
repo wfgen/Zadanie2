@@ -61,7 +61,9 @@ jobs:
         run: |
           echo "::set-output name=version::$(python generate_version.py ${{ steps.get-version.outputs.version }})"
 
-      - name: Push Docker image
-        run: |
-          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
-          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+      #- name: Push Docker image
+       # run: |
+        #  docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+         # docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+      - name: Show version
+        run: echo "Generated version:${{ steps.generate_version.outputs.version }}"
