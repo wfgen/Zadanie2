@@ -63,7 +63,9 @@ jobs:
 
       - name: Tag and push Docker image
         run: |
+          docker tag ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }} ghcr.io/wfgen/zadanie2docker:latest
           docker push ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }}
+          docker push ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Show version
         run: |
