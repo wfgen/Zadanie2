@@ -30,7 +30,6 @@ jobs:
       - name: Build Docker image
         run: |
           docker build --cache-from my-docker-image -t my-docker-image .
-          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Install Trivy
         run: |
@@ -38,11 +37,11 @@ jobs:
 
       - name: Scan Docker image for vulnerabilities
         run: |
-          trivy image ghcr.io/wfgen/zadanie2docker:latest
+          trivy image my-docker-image
 
       - name: Display vulnerabilities report
         run: |
-          trivy image -f json ghcr.io/wfgen/zadanie2docker:latest > report.json
+          trivy image -f json my-docker-image > report.json
           cat report.json
 
       - name: Login to GitHub Container Registry
@@ -55,14 +54,14 @@ jobs:
       - name: Get latest image version
         id: get-version
         run: |
-          echo "::set-output name=version::$(docker images --format "{{.Tag}}" ghcr.io/wfgen/zadanie2docker | sort -V | tail -1)"
+          echo "::set-output name=version::$(docker images --format "{{.Tag}}" my-docker-image | sort -V | tail -1)"
 
       - name: Generate new image version
         id: generate-version
         run: |
           echo "::set-output name=version::$(python generate_version.py ${{ steps.get-version.outputs.version }})"
 
-      - name: Tag and push Docker image
+      - name: Push Docker image
         run: |
           docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
           docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
