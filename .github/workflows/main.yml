@@ -67,6 +67,9 @@ jobs:
           docker push ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }}
           docker push ghcr.io/wfgen/zadanie2docker:latest
 
-      - name: Show version
+      - name: Update README.md
         run: |
-          echo "Generated version: ${{ steps.build.outputs.IMAGE_TAG }}"
+          echo "Generated version: ${{ steps.build.outputs.IMAGE_TAG }}" >> README.md
+          git add README.md
+          git commit -m "Update README with generated version"
+          git push
