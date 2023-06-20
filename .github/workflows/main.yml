@@ -21,25 +21,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Restore Docker image cache
+      - name: Cache Docker layers
         uses: actions/cache@v2
         with:
-          path: /var/lib/docker
+          path: ~/.docker
           key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
 
       - name: Build Docker image
         run: |
-          DOCKER_TAG=sha-${{ github.sha }}
-          docker build -t ghcr.io/wfgen/zadanie2docker:${DOCKER_TAG} .
-          echo $DOCKER_TAG > IMAGE_TAG
-        env:
-          DOCKER_CLI_EXPERIMENTAL: enabled
-
-      - name: Save Docker image cache
-        uses: actions/cache@v2
-        with:
-          path: /var/lib/docker
-          key: ${{ runner.os }}-docker-${{ hashFiles('**/Dockerfile') }}
+          docker build --cache-from my-docker-image -t my-docker-image .
+          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Install Trivy
         run: |
@@ -47,11 +38,11 @@ jobs:
 
       - name: Scan Docker image for vulnerabilities
         run: |
-          trivy image ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }}
+          trivy image ghcr.io/wfgen/zadanie2docker:latest
 
       - name: Display vulnerabilities report
         run: |
-          trivy image -f json ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }} > report.json
+          trivy image -f json ghcr.io/wfgen/zadanie2docker:latest > report.json
           cat report.json
 
       - name: Login to GitHub Container Registry
@@ -61,15 +52,17 @@ jobs:
           username: github
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Get latest image version
+        id: get-version
+        run: |
+          echo "::set-output name=version::$(docker images --format "{{.Tag}}" ghcr.io/wfgen/zadanie2docker | sort -V | tail -1)"
+
+      - name: Generate new image version
+        id: generate-version
+        run: |
+          echo "::set-output name=version::$(python generate_version.py ${{ steps.get-version.outputs.version }})"
+
       - name: Tag and push Docker image
         run: |
-          docker tag ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }} ghcr.io/wfgen/zadanie2docker:latest
-          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.build.outputs.IMAGE_TAG }}
-          docker push ghcr.io/wfgen/zadanie2docker:latest
-
-      - name: Update README.md
-        run: |
-          echo "Generated version: ${{ steps.build.outputs.IMAGE_TAG }}" >> README.md
-          git add README.md
-          git commit -m "Update README with generated version"
-          git push
+          docker tag my-docker-image ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
+          docker push ghcr.io/wfgen/zadanie2docker:${{ steps.generate-version.outputs.version }}
